@@ -3,7 +3,7 @@ import urllib.request, urllib.error, json, sys, io, time, re, os, ssl
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
 TOKEN = os.environ["GH_TOKEN"]
-HEADERS = {"Authorization": "token " + TOKEN, "User-Agent": "monitor-agent-v8"}
+HEADERS = {"Authorization": "token " + TOKEN, "User-Agent": "monitor-agent-v9"}
 API = "https://api.github.com/repos/zhangjiayang6835-cyber/ai-research"
 LEADERBOARD_COMMENT_ID = 4834744003
 TIME_LEADERBOARD_ISSUE = 29
@@ -81,7 +81,6 @@ def post(url, data, method="POST", retries=3):
                 raise
 
 def check_deadline(issue_num):
-    """检查 Issue 是否已过截止时间"""
     try:
         if issue_num in ISSUE_CREATED:
             created = ISSUE_CREATED[issue_num]
@@ -108,7 +107,6 @@ def check_deadline(issue_num):
         return True, "（查询失败，默认放行）"
 
 def check_starred(username):
-    """检查用户是否给仓库加了星标"""
     try:
         url = f"https://api.github.com/users/{username}/starred/zhangjiayang6835-cyber/ai-research"
         req = urllib.request.Request(url, headers=HEADERS)
@@ -143,7 +141,6 @@ def cheat_detect(code):
     return findings
 
 def save_training_data(username, issue_num, code, findings, score_pass, total):
-    """保存 AI 行为记录作为训练数据"""
     try:
         record = {
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -202,21 +199,42 @@ def build_evaluation(username, issue_num, findings, score_pass):
     return comment, total
 
 def format_duration(seconds):
-    """格式化时长显示"""
     if seconds < 60:
         return f"{seconds:.0f}s"
     elif seconds < 3600:
-        m = seconds / 60
-        return f"{m:.0f}m {seconds % 60:.0f}s"
+        m = int(seconds / 60)
+        s = int(seconds % 60)
+        return f"{m}m {s}s"
     elif seconds < 86400:
-        h = seconds / 3600
-        return f"{h:.0f}h {(seconds % 3600) / 60:.0f}m"
+        h = int(seconds / 3600)
+        m = int((seconds % 3600) / 60)
+        return f"{h}h {m}m"
     else:
         d = seconds / 86400
         return f"{d:.1f}d"
 
+def parse_duration(dur_str):
+    if "d" in dur_str:
+        return float(dur_str.replace("d", "")) * 86400
+    elif "h" in dur_str:
+        parts = dur_str.split("h")
+        h = float(parts[0])
+        extra = 0
+        if "m" in parts[1]:
+            extra = float(parts[1].split("m")[0]) * 60
+        return h * 3600 + extra
+    elif "m" in dur_str:
+        parts = dur_str.split("m")
+        m = float(parts[0])
+        s = 0
+        if "s" in parts[1]:
+            s = float(parts[1].replace("s", ""))
+        return m * 60 + s
+    else:
+        return float(dur_str.replace("s", ""))
+
 def update_time_leaderboard(username, issue_num, submission_time_str):
-    """更新耗时排行榜 #29 (仅记录，无奖牌无代币)"""
+    """更新耗时排行榜 #29 — 按用户聚合总耗时"""
     try:
         data = fetch(f"{API}/issues/{issue_num}")
         created = data["created_at"]
@@ -224,60 +242,69 @@ def update_time_leaderboard(username, issue_num, submission_time_str):
         sub_ts = time.mktime(time.strptime(submission_time_str, "%Y-%m-%dT%H:%M:%SZ"))
         elapsed = sub_ts - created_ts
         if elapsed <= 0:
-            log(f"[TIME] #{issue_num}: {username} elapsed <=0 ({elapsed}s), skipping")
+            log(f"[TIME] #{issue_num}: {username} elapsed <=0 ({elapsed}s), skip")
             return
-        diff = DIFFICULTY.get(issue_num, "medium")
-        duration_str = format_duration(elapsed)
-        diff_labels = {"easy": "\U0001f7e2 简单", "medium": "\U0001f7e1 中等", "hard": "\U0001f534 困难"}
-        diff_label = diff_labels.get(diff, "\U0001f7e1 中等")
 
         url = f"{API}/issues/{TIME_LEADERBOARD_ISSUE}"
         current = fetch(url)
         body = current["body"]
-        lines = body.split("\n")
-        records = []
-        for line in lines:
-            m = re.search(r"\|\s*\d+\s*\|\s*(\w+)\s*\|\s*#(\d+)\s*\|\s*\S+\s*\|\s*(\S+)\s*\|", line)
+
+        # Parse existing per-user task durations
+        user_tasks = {}
+        for line in body.split("\n"):
+            m = re.search(r"\|(\w+)\|(\d+)\|([\d.]+)\|", line)
             if m:
-                records.append({"user": m.group(1), "issue": int(m.group(2)), "duration_str": m.group(3)})
-        existing_keys = set(f"{r['user']}#{r['issue']}" for r in records)
-        key = f"{username}#{issue_num}"
-        if key in existing_keys:
-            log(f"[TIME] #{issue_num}: {username} already in leaderboard, skipping")
-            return
-        records.append({"user": username, "issue": issue_num, "duration_str": duration_str})
+                u = m.group(1).strip()
+                tid = int(m.group(2).strip())
+                secs = float(m.group(3).strip())
+                if u not in user_tasks:
+                    user_tasks[u] = {}
+                user_tasks[u][tid] = secs
 
-        def parse_dur(d):
-            if "d" in d:
-                return float(d.replace("d", "")) * 86400
-            elif "h" in d:
-                return float(d.split("h")[0]) * 3600
-            elif "m" in d:
-                return float(d.split("m")[0]) * 60
-            else:
-                return float(d.replace("s", ""))
-        records.sort(key=lambda x: parse_dur(x["duration_str"]))
+        # Add current task
+        if username not in user_tasks:
+            user_tasks[username] = {}
+        user_tasks[username][issue_num] = elapsed
 
-        tbl = ["| 排名 | 参与者 | 任务 | 难度 | 耗时 |", "|:---:|:------:|:----:|:----:|:----:|"]
-        for i, rec in enumerate(records):
-            rk = i + 1
-            rec_diff = DIFFICULTY.get(rec["issue"], "medium")
-            rl = diff_labels.get(rec_diff, "\U0001f7e1 中等")
-            tbl.append(f"| {rk} | {rec['user']} | #{rec['issue']} {ISSUE_NAMES.get(rec['issue'], '')} | {rl} | {rec['duration_str']} |")
+        # Aggregate: total time per user
+        user_agg = []
+        for u, tasks in user_tasks.items():
+            total = sum(tasks.values())
+            cnt = len(tasks)
+            user_agg.append({"user": u, "total": total, "count": cnt, "tasks": tasks})
 
-        new_body = f"""# \u23f1\ufe0f \u4efb\u52a1\u8017\u65f6\u8bb0\u5f55
+        user_agg.sort(key=lambda x: x["total"])
 
-\u8bb0\u5f55 AI \u4fee\u590d\u4efb\u52a1\u7684\u5b8c\u6210\u901f\u5ea6\u3002
+        tbl = ["| 排名 | 参与者 | 完成任务数 | 总耗时 | 平均耗时 |", "|:---:|:------:|:--------:|:------:|:--------:|"]
+        for i, ua in enumerate(user_agg):
+            avg_s = ua["total"] / ua["count"]
+            total_str = format_duration(ua["total"])
+            avg_str = format_duration(avg_s)
+            tbl.append(f"| {i+1} | {ua['user']} | {ua['count']} | {total_str} | {avg_str} |")
 
-\u6392\u540d | \u53c2\u4e0e\u8005 | \u4efb\u52a1 | \u96be\u5ea6 | \u8017\u65f6
-:---:|:------:|:----:|:----:|:----:
+        # Build data rows for hidden parsing
+        data_rows = ""
+        for ua in user_agg:
+            for tid, secs in ua["tasks"].items():
+                data_rows += f"|{ua['user']}|{tid}|{secs}|\n"
+
+        new_body = f"""# ⏱️ 任务耗时排行榜
+
+按用户聚合总耗时，包含该用户完成所有任务的总时间。
+
+| 排名 | 参与者 | 完成任务数 | 总耗时 | 平均耗时 |
+|:---:|:------:|:--------:|:------:|:--------:|
 {chr(10).join(tbl[2:])}
 
-> \u23f1\ufe0f \u8017\u65f6\u4e3a Issue \u521b\u5efa\u5230\u63d0\u4ea4\u4fee\u590d\u7684\u65f6\u95f4\u5dee
-> \u6bcf\u6b21\u63d0\u4ea4\u81ea\u52a8\u8bb0\u5f55\uff0c\u6309\u8017\u65f6\u5347\u5e8f\u6392\u5217"""
+> ⏱️ 总耗时 = 该用户所有任务的耗时之和
+> 平均耗时 = 总耗时 / 任务数
+> 每次提交自动更新，按总耗时升序排列
+
+<!-- {data_rows}-->"""
 
         post(url, {"body": new_body}, method="PATCH")
-        log(f"[TIME LB] #{issue_num}: {username} {duration_str}")
+        total_s = user_agg[-1]["total"] if user_agg else 0
+        log(f"[TIME LB] {username}: +{format_duration(elapsed)} (total {format_duration(total_s)})")
     except Exception as e:
         log(f"[TIME LB ERR] #{issue_num}: {e}")
         import traceback
@@ -329,7 +356,7 @@ for i in ISSUES:
         known_comments[i] = set()
     time.sleep(1)
 
-log(f"=== MONITOR STARTED v8 ({len(ISSUES)} issues) ===")
+log(f"=== MONITOR STARTED v9 ({len(ISSUES)} issues) ===")
 
 cycle = 0
 while True:
@@ -357,22 +384,14 @@ while True:
                             code = code_blocks[0]
                             ok, msg = check_deadline(issue_num)
                             if not ok:
-                                reject = f"""## \u23f0 \u63d0\u4ea4\u88ab\u62d2\u7edd
-**\u63d0\u4ea4\u8005**: {author}
-**\u4efb\u52a1**: #{issue_num}
-**\u539f\u56e0**: \u622a\u6b62\u65f6\u95f4\u5df2\u8fc7\uff0c\u65e0\u6cd5\u63d0\u4ea4\u4fee\u590d\u3002
-
-> \u6bcf\u4e2a\u4efb\u52a1\u6709\u65f6\u95f4\u9650\u5236\uff0c\u8bf7\u5728\u89c4\u5b9a\u65f6\u95f4\u5185\u5b8c\u6210\u3002"""
+                                reject = "超时拒绝"
                                 post(f"{API}/issues/{issue_num}/comments", {"body": reject})
                                 log(f"[REJECT] #{issue_num}: {author} (deadline passed)")
                                 known_comments[issue_num].add(c["id"])
                                 continue
                             starred, star_msg = check_starred(author)
                             if not starred:
-                                reject = f"""## \u2b50 \u63d0\u4ea4\u88ab\u62d2\u7edd
-**\u63d0\u4ea4\u8005**: {author}
-**\u4efb\u52a1**: #{issue_num}
-**\u539f\u56e0**: {star_msg}"""
+                                reject = f"## ⭐ 提交被拒绝\n**提交者**: {author}\n**任务**: #{issue_num}\n**原因**: {star_msg}"
                                 post(f"{API}/issues/{issue_num}/comments", {"body": reject})
                                 log(f"[REJECT] #{issue_num}: {author} (not starred)")
                                 known_comments[issue_num].add(c["id"])
@@ -384,7 +403,7 @@ while True:
                             ct, total = build_evaluation(author, issue_num, findings, sp)
                             r = post(f"{API}/issues/{issue_num}/comments", {"body": ct})
                             submission_time = c["created_at"]
-                            log(f"[EVAL] #{issue_num}: {author} +{total} (cid={r['id']})")
+                            log(f"[EVAL] #{issue_num}: {author} +{total}")
                             save_training_data(author, issue_num, code, findings, sp, total)
                             update_leaderboard({"user": author, "score": total, "issue": issue_num, "clean": clean})
                             update_time_leaderboard(author, issue_num, submission_time)
