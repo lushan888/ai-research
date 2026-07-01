@@ -4,6 +4,12 @@
 # Conflicts:
 #	notify_email.py\n- fix: apply solution for issue #149
 # Conflicts:
+#	shanaboo_solution.md\n\n### 👥 贡献者\n\n- @github-actions[bot]\n- @AI Training Bot\n- @彭于晏\n- @AutoBot\n- @Daniel Bates\n\n---\n> 💡 虚拟代币仅供学习排名使用，不可兑换为现金或加密货币。\n## 2026-07-01\n\n### 🐛 Bug修复\n\n- fix: remove leading ** from YAML to prevent alias parsing error\n- fix: also exclude action_required from health calc\n- fix: add SHA param for leaderboard.svg update\n- fix: remove push trigger + add PR check in sandbox-verify\n- fix: use core.warning instead of core.setFailed for expected no-code case\n- fix: exclude skipped/cancelled runs from health check\n- fix: add SHA param for CREDIT_SCORE.json update\n- fix: apply solution for issue #107
+# Conflicts:
+#	shanaboo_solution.md\n- fix: apply solution for issue #108
+# Conflicts:
+#	notify_email.py\n- fix: apply solution for issue #149
+# Conflicts:
 #	shanaboo_solution.md\n- fix: apply solution for issue #155
 # Conflicts:
 #	shanaboo_solution.md\n\n### 👥 贡献者\n\n- @github-actions[bot]\n- @彭于晏\n- @AI Training Bot\n- @AutoBot\n- @Daniel Bates\n\n---\n> 💡 虚拟代币仅供学习排名使用，不可兑换为现金或加密货币。\n## 2026-07-01\n\n### 🐛 Bug修复\n\n- fix: remove leading ** from YAML to prevent alias parsing error\n- fix: also exclude action_required from health calc\n- fix: add SHA param for leaderboard.svg update\n- fix: remove push trigger + add PR check in sandbox-verify\n- fix: use core.warning instead of core.setFailed for expected no-code case\n- fix: exclude skipped/cancelled runs from health check\n- fix: add SHA param for CREDIT_SCORE.json update\n- fix: apply solution for issue #107
