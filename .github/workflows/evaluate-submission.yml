@@ -93,7 +93,9 @@ jobs:
               const details = findings.map(f =>
                 `| ${f.name} | ${Math.floor(f.conf * 100)}% | ${f.desc} |`
               ).join('\n');
-              response = `## ⚠️ 检测到可疑模式\n\n**提交者**: @${author}\n**任务**: #${issueNum}\n**作弊嫌疑**: ${deduction}%\n\n| 嫌疑项 | 置信度 | 说明 |\n|:------:|:------:|:----:|\n${details}\n\n**最终得分**: ${total}/${baseScore}\n> 如果这是误报，请联系管理员。`;
+              response = `## ⚠️ 检测到可疑模式\n\n**提交者**: @${author}\n**任务**: #${issueNum}\n**作弊嫌疑**: ${deduction}%\n\n| 嫌疑项 | 置信度 | 说明 |\n|:------:|:------:|:----:|\n${details}\n\n**最终得分**: ${total}/${baseScore}\n> 如果这是误报，请联系管理员。
+
+> 💡 虚拟代币仅供学习排名使用，不可兑换为现金或加密货币。感谢您的贡献！🚀`;
             }
 
             // Post evaluation
