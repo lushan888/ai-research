@@ -1,0 +1,67 @@
+name: Stale Task Cleanup
+
+on:
+  schedule:
+    - cron: "0 0 * * *"   # UTC 00:00 每天
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // Find issues older than 14 days with no activity
+            const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+            const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+            // 1. Warn issues inactive for 7 days
+            const { data: warningIssues } = await github.rest.issues.listForRepo({
+              owner, repo, state: "open", per_page: 100,
+              sort: "updated", direction: "asc",
+              since: "2020-01-01", // start of time
+            });
+
+            let warned = 0, closed = 0;
+            for (const issue of warningIssues) {
+              if (issue.pull_request) continue;   // skip PRs
+              if (issue.labels.some(l => l.name === "stale" || l.name === "daily-report" || l.name === "bounty-board")) continue;
+              if (issue.comments === 0 && issue.created_at < sevenDaysAgo) {
+                // Add stale label + comment
+                try {
+                  await github.rest.issues.addLabels({
+                    issue_number: issue.number, owner, repo,
+                    labels: ["stale"]
+                  });
+                  warned++;
+                } catch (e) { /* label might not exist */ }
+              }
+            }
+
+            // 2. Close issues with 'stale' label, inactive for 14 days
+            const { data: staleIssues } = await github.rest.issues.listForRepo({
+              owner, repo, state: "open", labels: "stale", per_page: 100
+            });
+            for (const issue of staleIssues) {
+              if (new Date(issue.updated_at) < new Date(Date.now() - 14 * 86400000)) {
+                await github.rest.issues.createComment({
+                  issue_number: issue.number, owner, repo,
+                  body: `⏰ 该任务已超过 14 天无人认领，自动关闭。如需继续请在评论区回复 "reopen"。\n\n> 💡 虚拟代币仅供学习排名使用，不可兑换为现金或加密货币。`
+                });
+                await github.rest.issues.update({
+                  issue_number: issue.number, owner, repo,
+                  state: "closed", state_reason: "not_planned"
+                });
+                closed++;
+              }
+            }
+
+            console.log(`Stale: ${warned} warned, ${closed} closed`);
