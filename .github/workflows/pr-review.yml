@@ -174,7 +174,7 @@ jobs:
             else if (totalAdditions > 500) { qualityScore -= 10; qualityNotes.push("too large"); }
             const hasTests = files.some(f => /test|spec/i.test(f.filename));
             if (!hasTests) { qualityScore -= 10; qualityNotes.push("no tests"); }
-            const combinedScore = Math.round((score + qualityScore) / 2);
+            const combinedScore = Math.round((totalScore + qualityScore) / 2);
             console.log("Quality score: " + qualityScore + "/100, Combined: " + combinedScore + "/100");
 
             // AI ANALYSIS
