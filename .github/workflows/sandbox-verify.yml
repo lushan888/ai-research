@@ -21,13 +21,13 @@ jobs:
           # Create a temporary test environment
           mkdir -p /tmp/sandbox
           cat > /tmp/sandbox/Dockerfile << 'DOCKERFILE'
-FROM python:3.11-slim
-RUN pip install --no-cache-dir flask requests
-WORKDIR /app
-COPY vuln_app.py /app/
-COPY fix_code.py /app/
-CMD ["python", "test_fix.py"]
-DOCKERFILE
+          FROM python:3.11-slim
+          RUN pip install --no-cache-dir flask requests
+          WORKDIR /app
+          COPY vuln_app.py /app/
+          COPY fix_code.py /app/
+          CMD ["python", "test_fix.py"]
+          DOCKERFILE
 
       - name: Create Vulnerable App
         run: |
