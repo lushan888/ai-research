@@ -84,6 +84,24 @@ def _strip_ns(tag: str) -> str:
     return tag.rsplit("}", 1)[-1] if "}" in tag else tag
 
 
+# ---- New: Dangling DNS / subdomain takeover check ----
+# Block any HTTP(S) URI that references an external domain not explicitly whitelisted.
+# This prevents attackers from using an SVG as a vector to probe or abuse dangling DNS.
+_SAFE_URI_RE = re.compile(
+    r"^(?:#[A-Za-z0-9_\-.:]+"                     # in-doc fragment
+    r"|data:image/(?:png|jpeg|gif|webp);base64,[A-Za-z0-9+/=]+"
+    r"|https?://(?:127\.0\.0\.1|localhost)(?::\d+)?/.+|https?://(?:[a-zA-Z0-9-]+\.)*allowed\.example\.com/.+"
+    r")$"
+)
+
+def _has_external_http_uri(val: str) -> bool:
+    # Check if the value looks like an http/https URL pointing to an external host.
+    import re
+    if re.match(r'^https?://', val, re.IGNORECASE):
+        # If it doesn't match our safe pattern, it's external.
+        return not _SAFE_URI_RE.match(val)
+    return False
+
 def _sanitize(elem: Element, depth: int, counter: list[int]) -> None:
     counter[0] += 1
     if counter[0] > MAX_ELEMENT_COUNT:
@@ -104,6 +122,9 @@ def _sanitize(elem: Element, depth: int, counter: list[int]) -> None:
             continue
 
         if local_attr in _URI_ATTRS or attr in _URI_ATTRS:
+            # ---- Dangling DNS defense ----
+            if _has_external_http_uri(val):
+                raise UnsafeSVGError(f"external URI not allowed (dangling DNS risk): {val[:50]}")
             # style attributes can hide url(...) — reject rather than partially parse CSS.
             if local_attr == "style":
                 low = val.lower()
