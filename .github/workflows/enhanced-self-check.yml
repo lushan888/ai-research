@@ -52,10 +52,20 @@ jobs:
             };
 
             // Update BOT_STATUS.json
+            let fileSha;
+            try {
+              const { data: fileInfo } = await github.rest.repos.getContent({
+                owner, repo, path: "BOT_STATUS.json"
+              });
+              fileSha = fileInfo.sha;
+            } catch (e) {
+              fileSha = undefined;
+            }
             await github.rest.repos.createOrUpdateFileContents({
               owner, repo, path: "BOT_STATUS.json",
               message: "chore: update bot health status",
-              content: Buffer.from(JSON.stringify(status, null, 2)).toString("base64")
+              content: Buffer.from(JSON.stringify(status, null, 2)).toString("base64"),
+              sha: fileSha
             });
 
             // Create/update health dashboard issue
