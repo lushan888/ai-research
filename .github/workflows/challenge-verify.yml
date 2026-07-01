@@ -57,10 +57,8 @@ jobs:
               else if (title.includes("spoof")) vulnType = "spoofing";
 
               // Analyze the fix
-              const addedLines = patch.split("
-            ").filter(l => l.startsWith("+") && !l.startsWith("+++"));
-              const removedLines = patch.split("
-            ").filter(l => l.startsWith("-") && !l.startsWith("---"));
+              const addedLines = patch.split("\n").filter(l => l.startsWith("+") && !l.startsWith("+++"));
+              const removedLines = patch.split("\n").filter(l => l.startsWith("-") && !l.startsWith("---"));
 
               // Check for common fix patterns
               const hasInputValidation = patch.some(l => /validate|sanitize|escape|strip/i.test(l));
