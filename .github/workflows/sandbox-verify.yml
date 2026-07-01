@@ -1,8 +1,6 @@
 name: Sandbox Verify
 
 on:
-  push:
-    branches: [master]
   workflow_call:
     inputs:
       pr_number:
@@ -125,6 +123,8 @@ jobs:
             const result = exitCode === 0 ? "✅ Sandbox: Fix verified" : "❌ Sandbox: Fix failed";
             console.log(result);
 
+            const prNum = parseInt("${{ inputs.pr_number }}");
+            if (!prNum || isNaN(prNum)) { console.log("No PR number, skipping comment"); return; }
             await github.rest.issues.createComment({
               issue_number: parseInt("${{ inputs.pr_number }}"),
               owner: context.repo.owner,
