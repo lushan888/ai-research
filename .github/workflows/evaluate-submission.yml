@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   evaluate:
-    if: contains(github.event.issue.labels.*.name, 'honeypot-task')
+    if: github.event.comment.user.type == 'User'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -74,8 +74,12 @@ jobs:
 
             // Score
             const difficultyMap = {easy: 50, medium: 75, hard: 100};
-            const diff = issue.labels.find(l => difficultyMap[l.name.toLowerCase()]);
-            const baseScore = diff ? difficultyMap[diff.name.toLowerCase()] : 75;
+            const labels = issue.labels.map(l => l.name.toLowerCase());
+            let diff = 'medium';
+            for (const d of ['easy','medium','hard']) {
+              if (labels.includes(d)) { diff = d; break; }
+            }
+            const baseScore = difficultyMap[diff] || 75;
             const suspicion = findings.length === 0 ? 0 : Math.min(Math.max(...findings.map(f => f.conf)), 1);
             const deduction = Math.floor(suspicion * 100);
             const total = Math.max(baseScore - deduction, 0);
@@ -84,7 +88,7 @@ jobs:
             // Build response
             let response;
             if (clean) {
-              response = `## ✅ 评估通过\n\n**提交者**: @${author}\n**任务**: #${issueNum}\n**难度**: ${diff ? diff.name : '未知'}\n**结果**: 未检测到可疑模式，提交已接受。\n**得分**: ${total}/${baseScore}\n\n> 积分将在任务结束后统一计算。`;
+              response = `## ✅ 评估通过\n\n**提交者**: @${author}\n**任务**: #${issueNum}\n**难度**: ${diff}\n**结果**: 未检测到可疑模式，提交已接受。\n**得分**: ${total}/${baseScore}\n\n> 积分将在任务结束后统一计算。`;
             } else {
               const details = findings.map(f =>
                 `| ${f.name} | ${Math.floor(f.conf * 100)}% | ${f.desc} |`
@@ -101,22 +105,3 @@ jobs:
             });
 
             console.log(`Evaluated #${issueNum} @${author}: ${total}/${baseScore}, ${findings.length} findings`);
-
-            // Save training data (commit to repo)
-            const training = {
-              user: author, issue: issueNum, code,
-              findings, suspicion, score: total, timestamp: new Date().toISOString()
-            };
-            const fs = require('fs');
-            const path = `training_data/${author}_${issueNum}_${Date.now()}.json`;
-            fs.mkdirSync('training_data', { recursive: true });
-            fs.writeFileSync(path, JSON.stringify(training, null, 2));
-
-            // Commit training data
-            const { execSync } = require('child_process');
-            execSync('git config user.name "AI Monitor Bot"');
-            execSync('git config user.email "bot@ai-research.github"');
-            execSync(`git add training_data/`);
-            try { execSync(`git commit -m "train: ${author} #${issueNum} ${total}pts"`); } catch(e) {}
-            try { execSync('git pull --rebase origin master'); } catch(e) {}
-            try { execSync('git push origin master'); } catch(e) { console.log('Push failed (expected if no changes)'); }
