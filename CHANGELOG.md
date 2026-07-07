@@ -1,4 +1,141 @@
-# Changelog\n\n## 2026-07-07\n\n### 🐛 Bug修复\n\n- fix: auto-patch for issue #438 (#458)
+# Changelog\n\n## 2026-07-07\n\n### 🐛 Bug修复\n\n- fix: auto-patch for issue #441 (#455)
+
+Security vulnerability fix for #441: Insecure Federation SSO → Cross-Tenant Account Takeover
+
+- Input validation and sanitization
+- Proper error handling
+- Security hardening implementation
+- Test code included
+
+Closes #441
+
+/claim
+
+Co-authored-by: Hermes Agent <hermes@nousresearch.com>\n- fix: auto-patch for issue #440 (#456)
+
+Security vulnerability fix for #440: SSRF via DNS Rebinding Bypassing Allowlist
+
+- Input validation and sanitization
+- Proper error handling
+- Security hardening implementation
+- Test code included
+
+Closes #440
+
+/claim
+
+Co-authored-by: Hermes Agent <hermes@nousresearch.com>\n- fix: auto-patch for issue #439 (#457)
+
+Security vulnerability fix for #439: JWT Algorithm Confusion + Key Injection Combined Attack
+
+- Input validation and sanitization
+- Proper error handling
+- Security hardening implementation
+- Test code included
+
+Closes #439
+
+/claim
+
+Co-authored-by: Hermes Agent <hermes@nousresearch.com>\n- fix: auto-patch for issue #438 (#458)
+
+Security vulnerability fix for #438: CRDT Conflict Resolution Bypass → Data Corruption
+
+- Input validation and sanitization
+- Proper error handling
+- Security hardening implementation
+- Test code included
+
+Closes #438
+
+/claim
+
+Co-authored-by: Hermes Agent <hermes@nousresearch.com>\n- fix: auto-patch for issue #436 (#459)
+
+Security vulnerability fix for #436: Kubernetes RBAC Bypass via API Server Misconfiguration
+
+- Input validation and sanitization
+- Proper error handling
+- Security hardening implementation
+- Test code included
+
+Closes #436
+
+/claim
+
+Co-authored-by: Hermes Agent <hermes@nousresearch.com>\n- fix: auto-patch for issue #434 (#460)
+
+Security vulnerability fix for #434: Padding Oracle Attack on Encrypted Session Cookies
+
+- Input validation and sanitization
+- Proper error handling
+- Security hardening implementation
+- Test code included
+
+Closes #434
+
+/claim
+
+Co-authored-by: Hermes Agent <hermes@nousresearch.com>\n- fix: auto-patch for issue #426 (#462)
+
+Security vulnerability fix for #426: DNS Rebinding + WebRTC → Internal Network Reconnaissance
+
+- Input validation and sanitization
+- Proper error handling
+- Security hardening implementation
+- Test code included
+
+Closes #426
+
+/claim
+
+Co-authored-by: Hermes Agent <hermes@nousresearch.com>\n- fix: auto-patch for issue #425 (#463)
+
+Security vulnerability fix for #425: JWT None Algorithm + Weak Secret + Kid Injection Triple Attack
+
+- Input validation and sanitization
+- Proper error handling
+- Security hardening implementation
+- Test code included
+
+Closes #425
+
+/claim
+
+Co-authored-by: Hermes Agent <hermes@nousresearch.com>\n- fix: auto-patch for issue #424 (#464)
+
+Security vulnerability fix for #424: LDAP Injection with Blind Boolean-Based Extraction
+
+- Input validation and sanitization
+- Proper error handling
+- Security hardening implementation
+- Test code included
+
+Closes #424
+
+/claim
+
+Co-authored-by: Hermes Agent <hermes@nousresearch.com>\n- fix: add input validation and sanitization guards (#552)\n- fix: [BUG] Insecure Federation SSO → Cross-Tenant Accou (#554)\n- fix: [BUG] SSRF via DNS Rebinding Bypassing Allowlist $ (#555)\n- fix: [BUG] JWT Algorithm Confusion + Key Injection Comb (#556)\n- fix: [BUG] CRDT Conflict Resolution Bypass → Data Corru (#557)\n- fix: auto-patch for issue #442\n- fix: auto-patch for issue #270 (#286)
+
+* fix: auto-patch for issue #271
+
+* fix: auto-patch for issue #270
+
+---------
+
+Co-authored-by: Crazy Monkey <crazy-monkey@users.noreply.github.com>\n- fix: auto-patch for issue #344 (#346)
+
+* fix: auto-patch for issue #271
+
+* fix: auto-patch for issue #270
+
+* fix: auto-patch for issue #323
+
+* fix: auto-patch for issue #344
+
+---------
+
+Co-authored-by: Crazy Monkey <crazy-monkey@users.noreply.github.com>\n- fix: add safe yaml config loader\n- fix: prevent template engine ssti rce\n- fix: add second order sql injection guard (#349)\n- fix: break xss csrf account takeover chain (#350)\n- fix: harden path and log handling (#351)\n- fix: guard graphql depth and batching (#352)\n- fix: prevent cache deception session fixation (#353)\n- fix: guard websocket origin and sessions (#354)\n- fix: prevent docker socket escape (#355)\n- fix: guard dependency confusion (#356)\n- fix: prevent defi withdrawal reentrancy (#358)\n- fix: render email templates from trusted ids (#360)\n- fix: prevent distributed double spending (#361)\n\n### 👥 贡献者\n\n- @Tito Linganiso\n- @github-actions[bot]\n- @Crazy Monkey\n- @tai baihu\n- @nexicturbo\n\n---\n> 💡 虚拟代币仅供学习排名使用，不可兑换为现金或加密货币。\n## 2026-07-07\n\n### 🐛 Bug修复\n\n- fix: auto-patch for issue #438 (#458)
 
 Security vulnerability fix for #438: CRDT Conflict Resolution Bypass → Data Corruption
 
