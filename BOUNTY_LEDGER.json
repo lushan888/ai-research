@@ -76,7 +76,7 @@
     "task_count": 6
   },
   "namdamdoi68-oss": {
-    "total": 75,
+    "total": 150,
     "submissions": [
       {
         "issue": 643,
@@ -85,6 +85,14 @@
         "clean": true,
         "difficulty": "medium",
         "date": "2026-07-07T17:25:49.607Z"
+      },
+      {
+        "issue": 647,
+        "targetIssue": "616",
+        "score": 75,
+        "clean": true,
+        "difficulty": "medium",
+        "date": "2026-07-07T17:28:14.630Z"
       }
     ]
   }
