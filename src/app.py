@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, render_template_string, make_response, session
 import sqlite3
 import secrets
@@ -5,6 +6,57 @@ import html
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(32)
+
+# ---------------------------------------------------------------------------
+# Fix for issue #963 — Host Header Injection → Password Reset Poisoning
+# ---------------------------------------------------------------------------
+# Trusted host whitelist.  Only hosts in this list are allowed to be used
+# in generated URLs (password reset links, redirects, etc.).
+TRUSTED_HOSTS = set(
+    h.strip().lower()
+    for h in os.environ.get(
+        "TRUSTED_HOSTS",
+        "localhost,127.0.0.1,0.0.0.0,app.example.com,api.example.com",
+    ).split(",")
+    if h.strip()
+)
+
+
+def get_base_url():
+    """Return a safe base URL built from a trusted host.
+
+    Never uses the user-supplied Host header for URL generation.
+    Falls back to the first entry in TRUSTED_HOSTS if the request Host
+    is not whitelisted.
+    """
+    if request and request.host and request.host.lower() in TRUSTED_HOSTS:
+        return f"{request.url_root.rstrip('/')}" if request else "https://app.example.com"
+    return "https://app.example.com"
+
+
+@app.before_request
+def validate_host_header():
+    """Reject requests whose Host header is not in the whitelist.
+
+    Prevents Host header injection attacks (e.g. password reset link
+    poisoning, cache poisoning).
+    """
+    if not request.host:
+        return None
+    host = request.host.lower().rstrip(":")
+    if host not in TRUSTED_HOSTS:
+        return make_response(
+            "<h1>400 Bad Request</h1><p>Invalid Host header.</p>", 400
+        )
+
+
+@app.after_request
+def security_headers(response):
+    """Add anti-tampering headers on every response."""
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    return response
 
 # Simulated user database
 users = {
@@ -107,6 +159,19 @@ def transfer():
     safe_amount = html.escape(str(amount))
     safe_to = html.escape(to_user)
     return f"Transferred {safe_amount} to {safe_to}"
+
+@app.route('/password_reset', methods=['POST'])
+def password_reset():
+    """Generate a password reset link using a TRUSTED host.
+
+    Never uses the user-supplied Host header for URL generation.
+    """
+    token = secrets.token_urlsafe(32)
+    # Use the safe base URL — never user-supplied Host
+    base = get_base_url()
+    reset_url = f"{base}/reset?token={token}"
+    return jsonify({"reset_url": reset_url})
+
 
 if __name__ == '__main__':
     # Security: Disable debug in production
