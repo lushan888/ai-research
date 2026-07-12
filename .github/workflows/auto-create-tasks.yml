@@ -104,4 +104,4 @@ jobs:
               console.log("Already at target (" + TARGET + "), nothing to do.");
             }
 
-            console.log("\n\u2728 \u865a\u62df\u4ee3\u5e01\u4ec5\u4f9b\u5b66\u4e60\u6392\u540d\u4f7f\u7528\uff0c\u4e0d\u53ef\u5151\u6362\u4e3a\u73b0\u91d1\u6216\u52a0\u5bc6\u8d27\u5e01\u3002\u611f\u8c22\u8d21\u732e\uff01\U0001f389";
+            console.log("\n✨ 💡 虚拟代币仅供学习排名使用，不可兑换为现金或加密货币。感谢贡献！🎉";
