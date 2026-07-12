@@ -147,18 +147,6 @@ jobs:
               owner, repo, pull_number: prNum,
               merge_method: "squash",
               commit_title: `fix: ${pr.title} (auto-merged #${prNum})`,
-              commit_message: `Auto-merged by AI Training Bot.\n${qualityBadge}✅ Score passed\n🔍 No cheating detected\n\n> 💡 虚拟代币仅供学习排名使用，不可兑换为现金或加密货币。感谢贡献！🎉``
+              commit_message: `Auto-merged by AI Training Bot.\n${qualityBadge}✅ Score passed\n🔍 No cheating detected\n\n> 💡 虚拟代币仅供学习排名使用，不可兑换为现金或加密货币。感谢贡献！🎉`
             });
             console.log(`PR #${prNum}: MERGED successfully!`);
-            } catch (e) {
-              // Merge conflict - need rebase
-              if (e.message && e.message.includes("merge conflict")) {
-                console.log(`PR #${prNum}: merge conflict, requesting rebase`);
-                await github.rest.issues.createComment({
-                  issue_number: prNum, owner, repo,
-                  body: `🔄 合并冲突，请 rebase 到最新 master。`
-                });
-              } else {
-                console.log(`PR #${prNum}: merge failed: ${e.message}`);
-              }
-            }
