@@ -3,14 +3,19 @@ name: Auto-Create Hard Tasks
 on:
   schedule:
     - cron: "0 2 * * *"   # UTC 02:00 = 北京时间 10:00
-  workflow_dispatch:       # 也可手动触发
+  workflow_dispatch:
+    inputs:
+      target_count:
+        description: Target number of open bounty tasks
+        required: false
+        default: "35"
 
 permissions:
   issues: write
   contents: read
 
 jobs:
-  create-tasks:
+  balance-tasks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/github-script@v7
@@ -18,6 +23,7 @@ jobs:
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
+            const TARGET = parseInt("${{ github.event.inputs.target_count || 35 }}");
 
             // ====== 30 High-Difficulty Security Task Templates ======
             // Rotated by date so each day gets different tasks
@@ -25,6 +31,7 @@ jobs:
             const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000);
 
             const allTasks = [
+
               // ── Web Advanced ──
               { title: "[BUG] WebSocket CSRF → Cross-Origin Data Exfiltration $150",
                 diff: "hard", tags: ["bug","bounty","security","hard"], bounty: 150,
@@ -892,43 +899,85 @@ jobs:
             - [ ] 生产环境禁用 Reflection
             - [ ] 使用 mTLS 认证
             - [ ] 内部 API 需要 service token` }
-            ];
+                        ];
 
-            // Select 30 tasks based on day of year (rotate through the pool)
-            const tasksPerDay = 30;
-            const selected = [];
-            for (let i = 0; i < tasksPerDay; i++) {
-              const idx = (dayOfYear * tasksPerDay + i) % allTasks.length;
-              selected.push(allTasks[idx]);
-            }
+            // Step 1: Count current open bounty tasks
+            const { data: openIssues } = await github.rest.issues.listForRepo({
+              owner, repo, state: "open", labels: "bounty", per_page: 100
+            });
+            const currentCount = openIssues.length;
+            console.log(`Current open bounty tasks: ${currentCount}, Target: ${TARGET}`);
 
-            // Create issues
-            let created = 0;
-            let errors = 0;
-            for (const task of selected) {
-              try {
-                await github.rest.issues.create({
-                  owner, repo,
-                  title: task.title,
-                  body: task.body,
-                  labels: task.tags
-                });
-                created++;
-                console.log(`  Created: ${task.title.substring(0, 50)}...`);
-                // Rate limit: wait 1s between creates
-                await new Promise(r => setTimeout(r, 1000));
-              } catch (e) {
-                errors++;
-                console.log(`  ERROR: ${task.title.substring(0, 40)}... ${e.message}`);
-                if (e.status === 403) {
-                  console.log("Rate limited! Stopping.");
-                  break;
-                }
-                await new Promise(r => setTimeout(r, 2000));
+            // Step 2: Calculate how many to create or close
+            const diff = TARGET - currentCount;
+
+            if (diff > 0) {
+              // Need to create more tasks
+              const toCreate = Math.min(diff, 30); // Max 30 per run
+              console.log(`Creating ${toCreate} new tasks...`);
+
+              // Select tasks by day rotation
+              const selected = [];
+              for (let i = 0; i < toCreate; i++) {
+                const idx = (dayOfYear * 30 + i) % allTasks.length;
+                selected.push(allTasks[idx]);
               }
+
+              let created = 0;
+              let errors = 0;
+              for (const task of selected) {
+                try {
+                  await github.rest.issues.create({
+                    owner, repo,
+                    title: task.title,
+                    body: task.body,
+                    labels: task.tags
+                  });
+                  created++;
+                  console.log(`  Created: ${task.title.substring(0, 50)}...`);
+                  await new Promise(r => setTimeout(r, 1000));
+                } catch (e) {
+                  errors++;
+                  console.log(`  ERROR: ${e.message}`);
+                  if (e.status === 403) { console.log("Rate limited!"); break; }
+                  await new Promise(r => setTimeout(r, 2000));
+                }
+              }
+              console.log(`\nCreated ${created} tasks, ${errors} errors`);
+              core.setOutput("action", `created ${created}`);
+
+            } else if (diff < 0) {
+              // Too many tasks - close the oldest ones
+              const toClose = Math.min(Math.abs(diff), currentCount);
+              console.log(`Closing ${toClose} oldest tasks...`);
+
+              // Sort by creation date (oldest first)
+              const sorted = openIssues.sort((a, b) =>
+                new Date(a.created_at) - new Date(b.created_at)
+              );
+
+              let closed = 0;
+              for (let i = 0; i < toClose; i++) {
+                try {
+                  await github.rest.issues.update({
+                    issue_number: sorted[i].number,
+                    owner, repo,
+                    state: "closed",
+                    state_reason: "not_planned"
+                  });
+                  closed++;
+                  console.log(`  Closed #${sorted[i].number}: ${sorted[i].title.substring(0, 50)}`);
+                  await new Promise(r => setTimeout(r, 500));
+                } catch (e) {
+                  console.log(`  ERROR closing #${sorted[i].number}: ${e.message}`);
+                }
+              }
+              console.log(`\nClosed ${closed} old tasks`);
+              core.setOutput("action", `closed ${closed}`);
+
+            } else {
+              console.log(`Already at target (${TARGET}), nothing to do.`);
+              core.setOutput("action", "none");
             }
 
-            core.setOutput('created', created.toString());
-            core.setOutput('errors', errors.toString());
-            console.log(`\nDone: ${created} created, ${errors} errors`);
-            console.log("💡 虚拟代币仅供学习排名使用，不可兑换为现金或加密货币。感谢贡献！🎉");
+            console.log(`\n💡 虚拟代币仅供学习排名使用，不可兑换为现金或加密货币。感谢贡献！🎉`);
