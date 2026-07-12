@@ -1,0 +1,40 @@
+name: Auto-Close Cheat PRs
+
+on:
+  pull_request:
+    types: [labeled]
+  issues:
+    types: [labeled]
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  auto-close:
+    if: github.event.label.name == "cheat-detected"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request || context.payload.issue;
+            const prNum = pr.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // Close the PR
+            await github.rest.issues.update({
+              issue_number: prNum,
+              owner, repo,
+              state: "closed"
+            });
+
+            // Add a comment
+            await github.rest.issues.createComment({
+              issue_number: prNum,
+              owner, repo,
+              body: "## \u274c PR \u5df2\u81ea\u52a8\u5173\u95ed\n\n\u68c0\u6d4b\u5230\u4f5c\u5f0a/\u81ea\u52a8\u5316\u63d0\u4ea4\uff0c\u5df2\u81ea\u52a8\u5173\u95ed\u3002\n\n> \u865a\u62df\u4ee3\u5e01\u4ec5\u4f9b\u5b66\u4e60\u6392\u540d\u4f7f\u7528\uff0c\u4e0d\u53ef\u5151\u6362\u4e3a\u73b0\u91d1\u6216\u52a0\u5bc6\u8d27\u5e01\u3002"
+            });
+
+            console.log("PR #" + prNum + ": auto-closed due to cheat-detected label");
