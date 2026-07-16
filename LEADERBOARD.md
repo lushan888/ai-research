@@ -1,6 +1,6 @@
 # 🏆 AI 安全修复排行榜
 
-> _更新于 2026-07-15 04:39 UTC  ·  12 名参与者  ·  总计 4245 🪙 HONEY_
+> _更新于 2026-07-16 04:49 UTC  ·  13 名参与者  ·  总计 4395 🪙 HONEY_
 
 ---
 
@@ -21,11 +21,12 @@
 | 5 | `danielalanbates` | **515** | 13 | 🌱 1d | — | 🥇 |
 | 6 | `namdamdoi68-oss` | **300** | 4 | 🌱 1d | ✅ | 🥈 |
 | 7 | `foxyManTou` | **220** | 10 |  0d | — | 🥈 |
-| 8 | `bambooshadow-studio` | **105** | 14 |  0d | — | 🥉 |
-| 9 | `Zubi-fix` | **100** | 3 |  0d | — | 🥉 |
-| 10 | `MRhuang1106` | **65** | 4 |  0d | — | 🥉 |
-| 11 | `merlinsantiago982-cmd` | **-35** | 1 |  0d | — | 📋 |
-| 12 | `jhaayushkumar` | **-210** | 6 |  0d | — | 📋 |
+| 8 | `voladoradepapantla-netizen` | **150** | 0 | 🌱 1d | ✅ | 🥉 |
+| 9 | `bambooshadow-studio` | **105** | 14 |  0d | — | 🥉 |
+| 10 | `Zubi-fix` | **100** | 3 |  0d | — | 🥉 |
+| 11 | `MRhuang1106` | **65** | 4 |  0d | — | 🥉 |
+| 12 | `merlinsantiago982-cmd` | **-35** | 1 |  0d | — | 📋 |
+| 13 | `jhaayushkumar` | **-210** | 6 |  0d | — | 📋 |
 
 ## 📋 任务完成榜
 
@@ -43,6 +44,7 @@
 | 10 | `Zubi-fix` | 3 |
 | 11 | `merlinsantiago982-cmd` | 1 |
 | 12 | `zydd123` | 0 |
+| 13 | `voladoradepapantla-netizen` | 0 |
 
 ## 🔥 近期活跃
 
@@ -51,6 +53,7 @@
 | `zydd123` | 9 | 675 |
 | `danielalanbates` | 5 | 515 |
 | `namdamdoi68-oss` | 4 | 300 |
+| `voladoradepapantla-netizen` | 2 | 150 |
 
 ---
 
