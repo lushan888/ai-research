@@ -1,8 +1,8 @@
 {
   "meta": {
-    "last_updated": "2026-07-16 04:49 UTC",
+    "last_updated": "2026-07-17 04:52 UTC",
     "total_participants": 13,
-    "total_bounties_paid": 4395
+    "total_bounties_paid": 4470
   },
   "medals": [
     {
@@ -81,21 +81,21 @@
     },
     {
       "rank": 7,
+      "name": "voladoradepapantla-netizen",
+      "total_honey": 225,
+      "task_count": 0,
+      "streak_days": 1,
+      "clean_count": 3,
+      "grade": "silver"
+    },
+    {
+      "rank": 8,
       "name": "foxyManTou",
       "total_honey": 220,
       "task_count": 10,
       "streak_days": 0,
       "clean_count": 0,
       "grade": "silver"
-    },
-    {
-      "rank": 8,
-      "name": "voladoradepapantla-netizen",
-      "total_honey": 150,
-      "task_count": 0,
-      "streak_days": 1,
-      "clean_count": 2,
-      "grade": "bronze"
     },
     {
       "rank": 9,

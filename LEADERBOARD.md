@@ -1,6 +1,6 @@
 # 🏆 AI 安全修复排行榜
 
-> _更新于 2026-07-16 04:49 UTC  ·  13 名参与者  ·  总计 4395 🪙 HONEY_
+> _更新于 2026-07-17 04:52 UTC  ·  13 名参与者  ·  总计 4470 🪙 HONEY_
 
 ---
 
@@ -20,8 +20,8 @@
 | 4 | `hero-infosec` | **525** | 14 |  0d | — | 🥇 |
 | 5 | `danielalanbates` | **515** | 13 | 🌱 1d | — | 🥇 |
 | 6 | `namdamdoi68-oss` | **300** | 4 | 🌱 1d | ✅ | 🥈 |
-| 7 | `foxyManTou` | **220** | 10 |  0d | — | 🥈 |
-| 8 | `voladoradepapantla-netizen` | **150** | 0 | 🌱 1d | ✅ | 🥉 |
+| 7 | `voladoradepapantla-netizen` | **225** | 0 | 🌱 1d | ✅ | 🥈 |
+| 8 | `foxyManTou` | **220** | 10 |  0d | — | 🥈 |
 | 9 | `bambooshadow-studio` | **105** | 14 |  0d | — | 🥉 |
 | 10 | `Zubi-fix` | **100** | 3 |  0d | — | 🥉 |
 | 11 | `MRhuang1106` | **65** | 4 |  0d | — | 🥉 |
@@ -53,7 +53,7 @@
 | `zydd123` | 9 | 675 |
 | `danielalanbates` | 5 | 515 |
 | `namdamdoi68-oss` | 4 | 300 |
-| `voladoradepapantla-netizen` | 2 | 150 |
+| `voladoradepapantla-netizen` | 3 | 225 |
 
 ---
 

@@ -9,7 +9,7 @@
   .line { stroke: #30363d; stroke-width: 1; }
 </style>
 <text x="30" y="30" class="title">🏆 AI Research Leaderboard</text>
-<text x="30" y="55" class="header">Updated: 2026-07-16</text>
+<text x="30" y="55" class="header">Updated: 2026-07-17</text>
 <line x1="20" y1="85" x2="780" y2="85" class="line"/>
 <text x="30" y="93" class="header">Rank</text>
 <text x="90" y="93" class="header">Participant</text>
@@ -48,15 +48,15 @@
 <text x="500" y="230" class="row">4</text>
 <text x="600" y="230" class="row">🌱 1d</text>
 <text x="30" y="252" class="row">#7</text>
-<text x="90" y="252" class="row">foxyManTou</text>
-<text x="400" y="252" class="score">220</text>
-<text x="500" y="252" class="row">10</text>
-<text x="600" y="252" class="row"> 0d</text>
+<text x="90" y="252" class="row">voladoradepapant</text>
+<text x="400" y="252" class="score">225</text>
+<text x="500" y="252" class="row">0</text>
+<text x="600" y="252" class="row">🌱 1d</text>
 <text x="30" y="274" class="row">#8</text>
-<text x="90" y="274" class="row">voladoradepapant</text>
-<text x="400" y="274" class="score">150</text>
-<text x="500" y="274" class="row">0</text>
-<text x="600" y="274" class="row">🌱 1d</text>
+<text x="90" y="274" class="row">foxyManTou</text>
+<text x="400" y="274" class="score">220</text>
+<text x="500" y="274" class="row">10</text>
+<text x="600" y="274" class="row"> 0d</text>
 <text x="30" y="296" class="row">#9</text>
 <text x="90" y="296" class="row">bambooshadow-stu</text>
 <text x="400" y="296" class="score">105</text>
